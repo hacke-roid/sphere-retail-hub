@@ -1,20 +1,17 @@
-import {
-  Activity,
-  Building2,
-  Package,
-  TrendingUp,
-  Users,
-} from "lucide-react";
+import { Activity, Building2, Package, TrendingUp, Users } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import StatCard from "../../components/StatCard";
 import PageHeader from "../../components/PageHeader";
 import { useAuth } from "../../context/AuthContext";
-import { getDashboard, type DashboardMetrics } from "../../services/appDataService";
+import {
+  getDashboard,
+  type DashboardMetrics,
+} from "../../services/appDataService";
 import type { AuthUser } from "../../types/auth";
 
 const copy = {
   super_admin: {
-    title: "Platform Dashboard",
+    title: "Platform Dashboard service",
     subtitle: "Welcome back! Here's your platform overview",
   },
   admin: {
@@ -66,7 +63,9 @@ const DashboardPage = ({ user }: { user: AuthUser }) => {
   const { token } = useAuth();
   const page = copy[user.role];
   const [metrics, setMetrics] = useState<DashboardMetrics>({});
-  const [tenantTypes, setTenantTypes] = useState<Array<{ type: string; count: number }>>([]);
+  const [tenantTypes, setTenantTypes] = useState<
+    Array<{ type: string; count: number }>
+  >([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -143,9 +142,7 @@ const DashboardPage = ({ user }: { user: AuthUser }) => {
         <article className="chart-card revenue-card">
           <h2>Revenue Trend</h2>
           <p>Monthly revenue from recorded transactions</p>
-          <div className="empty-panel">
-            No revenue records yet
-          </div>
+          <div className="empty-panel">No revenue records yet</div>
         </article>
 
         <article className="chart-card">
