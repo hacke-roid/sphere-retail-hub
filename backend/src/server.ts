@@ -43,7 +43,17 @@ app.use("/v1/api", apiRouter);
 app.use((error: Error, req: Request, res: Response, next: NextFunction) => {
   console.error(error);
 
-  res.status(500).json({
+  if (
+    error.message.startsWith("SMTP email is not configured") ||
+    error.message.startsWith("Unable to send password email")
+  ) {
+    return res.status(503).json({
+      success: false,
+      message: error.message,
+    });
+  }
+
+  return res.status(500).json({
     success: false,
     message: "Internal server error",
   });

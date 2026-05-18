@@ -2,6 +2,7 @@ import DataTable, {
   DefaultActionButton,
   TableColumn,
 } from "../../components/DataTable";
+import type { PageRecord } from "../../services/appDataService";
 
 type Tenant = {
   id: string;
@@ -14,18 +15,26 @@ type Tenant = {
   revenue: string;
 };
 
-const tenants: Tenant[] = [
-  {
-    id: "1",
-    name: "Medical Store Pro",
-    email: "dr.patel@medstore.com",
-    type: "Medical",
-    owner: "Dr. Patel",
-    subscription: "Premium",
-    status: "Active",
-    revenue: "$12,500",
-  },
-];
+const formatText = (value: unknown) =>
+  typeof value === "string" || typeof value === "number" ? String(value) : "-";
+
+const formatCurrency = (value: unknown) =>
+  new Intl.NumberFormat("en-US", {
+    currency: "USD",
+    maximumFractionDigits: 0,
+    style: "currency",
+  }).format(typeof value === "number" ? value : Number(value) || 0);
+
+const mapTenant = (tenant: PageRecord): Tenant => ({
+  id: formatText(tenant.id || tenant._id),
+  name: formatText(tenant.name),
+  email: formatText(tenant.ownerEmail || tenant.email),
+  type: formatText(tenant.type),
+  owner: formatText(tenant.ownerName),
+  subscription: formatText(tenant.subscriptionPlan),
+  status: formatText(tenant.status),
+  revenue: formatCurrency(tenant.revenue),
+});
 
 const columns: TableColumn<Tenant>[] = [
   {
@@ -61,13 +70,15 @@ const columns: TableColumn<Tenant>[] = [
   },
 ];
 
-const TenantTable = () => {
+const TenantTable = ({ tenants }: { tenants: PageRecord[] }) => {
+  const rows = tenants.map(mapTenant);
+
   return (
     <DataTable
       columns={columns}
-      data={tenants}
+      data={rows}
       rowKey="id"
-      total={128}
+      total={rows.length}
       page={1}
       limit={5}
       renderActions={() => <DefaultActionButton />}

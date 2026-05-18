@@ -20,6 +20,14 @@ export const validateRegisterRequest = (
     typeof req.body.email === "string" ? normalizeEmail(req.body.email) : "";
   const password =
     typeof req.body.password === "string" ? req.body.password : "";
+  const role =
+    req.body.role === "super_admin" ||
+    req.body.role === "admin" ||
+    req.body.role === "member"
+      ? req.body.role
+      : undefined;
+  const tenantId =
+    typeof req.body.tenantId === "string" ? req.body.tenantId.trim() : undefined;
 
   if (!name || !email || password.length < passwordMinLength) {
     return fail(
@@ -31,6 +39,36 @@ export const validateRegisterRequest = (
   req.body.name = name;
   req.body.email = email;
   req.body.password = password;
+  req.body.role = role;
+  req.body.tenantId = tenantId || undefined;
+
+  return next();
+};
+
+export const validateCreateUserRequest = (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  const name = typeof req.body.name === "string" ? req.body.name.trim() : "";
+  const email =
+    typeof req.body.email === "string" ? normalizeEmail(req.body.email) : "";
+  const role =
+    req.body.role === "admin" || req.body.role === "member"
+      ? req.body.role
+      : undefined;
+  const tenantId =
+    typeof req.body.tenantId === "string" ? req.body.tenantId.trim() : "";
+
+  if (!name || !email || !role) {
+    return fail(res, "Name, email, and role are required");
+  }
+
+  req.body.name = name;
+  req.body.email = email;
+  req.body.role = role;
+  req.body.tenantId = tenantId || undefined;
+  delete req.body.password;
 
   return next();
 };

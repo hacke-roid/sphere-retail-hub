@@ -13,6 +13,7 @@ const router = express.Router();
 
 router.use(authenticate);
 
+router.get("/page", authorizePermission("tenant:view"), TenantController.pageData);
 router.get("/", authorizePermission("tenant:view"), TenantController.list);
 router.post(
   "/",

@@ -1,5 +1,5 @@
-import { Bell, LogOut } from "lucide-react";
-import { ReactNode } from "react";
+import { Bell, Crown, LogOut, Menu } from "lucide-react";
+import { ReactNode, useState } from "react";
 import { NavLink } from "react-router-dom";
 import { navItems } from "../config/navigation";
 import { useAuth } from "../context/AuthContext";
@@ -22,12 +22,21 @@ const roleDescription = {
 
 const AppLayout = ({ children }: AppLayoutProps) => {
   const { logout, user } = useAuth();
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const visibleNavItems = navItems.filter((item) =>
     item.roles.includes(user?.role || "member"),
   );
+  const closeMobileMenu = () => setIsMobileMenuOpen(false);
 
   return (
-    <div className="app-shell">
+    <div className={isMobileMenuOpen ? "app-shell menu-open" : "app-shell"}>
+      <button
+        aria-label="Close navigation"
+        className="mobile-menu-backdrop"
+        onClick={closeMobileMenu}
+        type="button"
+      />
+
       <aside className="app-sidebar">
         <div className="app-brand">
           <span className="brand-mark">S</span>
@@ -45,6 +54,7 @@ const AppLayout = ({ children }: AppLayoutProps) => {
                 end
                 to={item.path}
                 key={item.id}
+                onClick={closeMobileMenu}
               >
                 <Icon size={18} />
                 <span>{item.label}</span>
@@ -61,13 +71,24 @@ const AppLayout = ({ children }: AppLayoutProps) => {
 
       <section className="app-workspace">
         <header className="app-header">
+          <button
+            aria-label="Open navigation"
+            className="mobile-menu-button"
+            onClick={() => setIsMobileMenuOpen(true)}
+            type="button"
+          >
+            <Menu size={32} />
+          </button>
+
+          <div className="app-header-spacer" />
+
           <button className="icon-button" type="button">
             <Bell size={20} />
             <span />
           </button>
           {user && (
             <div className="account-pill">
-              <span className="mini-crown">♕</span>
+              <Crown className="mini-crown" size={19} />
               <div>
                 <strong>{roleLabel[user.role]}</strong>
                 <p>{roleDescription[user.role]}</p>
@@ -75,7 +96,7 @@ const AppLayout = ({ children }: AppLayoutProps) => {
             </div>
           )}
         </header>
-        {children}
+        <main className="app-page-scroll">{children}</main>
       </section>
     </div>
   );

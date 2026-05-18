@@ -1,18 +1,17 @@
-import React, { useMemo, useState } from "react";
+import { useMemo } from "react";
 import StatCard from "../../components/StatCard";
-import { useAuth } from "../../context/AuthContext";
-import { TenantMetrics } from "../../services/appDataService";
 import { ActivityIcon, Building2, TrendingUp, Users } from "lucide-react";
 import { Navigate } from "react-router-dom";
 import { AuthUser } from "../../types/auth";
 import TenantTable from "./TenantTable";
+import type { PageMetrics, PageRecord } from "../../services/appDataService";
 
 const metricConfig = {
   super_admin: [
     ["Total Tenants", "totalTenants", Building2],
     ["Active Shops", "activeTenants", ActivityIcon],
-    ["Trial Users", "totalRevenue", TrendingUp],
-    ["Platform Users", "activeUsers", Users],
+    ["Trial Tenants", "trialTenants", TrendingUp],
+    ["Platform Users", "platformUsers", Users],
   ],
 } as const;
 
@@ -30,12 +29,15 @@ const formatMetric = (label: string, value: number | undefined) => {
   return new Intl.NumberFormat("en-US").format(safeValue);
 };
 
-const Tenants = ({ user }: { user: AuthUser }) => {
-  const { token } = useAuth();
-  const [isLoading, setIsLoading] = useState(false);
-  const [metrics, setMetrics] = useState<{ [key: string]: number | undefined }>(
-    {},
-  );
+const Tenants = ({
+  user,
+  metrics,
+  records,
+}: {
+  user: AuthUser;
+  metrics: PageMetrics;
+  records: PageRecord[];
+}) => {
   if (!user) {
     return <Navigate to="/login" replace />;
   }
@@ -56,12 +58,12 @@ const Tenants = ({ user }: { user: AuthUser }) => {
             icon={icon}
             key={label}
             label={label}
-            trend={isLoading ? "Loading..." : "Live data"}
-            value={isLoading ? "..." : value}
+            trend="Live data"
+            value={value}
           />
         ))}
       </section>
-      <TenantTable />
+      <TenantTable tenants={records} />
     </>
   );
 };

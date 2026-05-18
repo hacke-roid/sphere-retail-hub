@@ -2,6 +2,16 @@ import type { NextFunction, Request, Response } from "express";
 import TenantService from "../services/TenantService";
 
 class TenantController {
+  async pageData(req: Request, res: Response, next: NextFunction) {
+    try {
+      const page = await TenantService.pageData(req.query as Record<string, string>);
+
+      return res.status(200).json({ success: true, page });
+    } catch (error) {
+      return next(error);
+    }
+  }
+
   async list(req: Request, res: Response, next: NextFunction) {
     try {
       const tenants = await TenantService.list(req.query as Record<string, string>);

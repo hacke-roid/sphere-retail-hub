@@ -12,6 +12,7 @@ const router = express.Router();
 
 router.use(authenticate);
 
+router.get("/page", authorizePermission("product:view"), ProductController.pageData);
 router.get("/", authorizePermission("product:view"), ProductController.list);
 router.post("/", authorizePermission("product:create"), ProductController.create);
 router.get("/:id", authorizePermission("product:view"), ProductController.getById);

@@ -12,6 +12,7 @@ const router = express.Router();
 
 router.use(authenticate);
 
+router.get("/page", authorizePermission("settings:manage"), SettingsController.pageData);
 router.get("/", authorizePermission("settings:manage"), SettingsController.list);
 router.put("/:key", authorizePermission("settings:manage"), SettingsController.upsert);
 

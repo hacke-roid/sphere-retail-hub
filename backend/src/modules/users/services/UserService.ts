@@ -1,4 +1,6 @@
 import bcrypt from "bcryptjs";
+import crypto from "crypto";
+import MailService from "../../../services/MailService";
 import UserAlreadyExistsError from "../errors/UserAlreadyExistsError";
 import PasswordResetTokenRepository from "../repositories/PasswordResetTokenRepository";
 import UserRepository from "../repositories/UserRepository";
@@ -12,6 +14,10 @@ import { toPublicUser } from "../utils/userMapper";
 import { createResetToken, hashResetToken, signUserToken } from "../utils/token";
 
 class UserService {
+  private createTemporaryPassword() {
+    return `Sphere-${crypto.randomBytes(4).toString("hex")}`;
+  }
+
   async register(input: RegisterUserRequest) {
     const existingUser = await UserRepository.findByEmail(input.email);
 
@@ -24,11 +30,46 @@ class UserService {
       name: input.name,
       email: input.email,
       passwordHash,
+      role: input.role,
+      tenantId: input.tenantId,
     });
 
     return {
       user: toPublicUser(user),
       token: signUserToken(user),
+    };
+  }
+
+  async createManagedUser(input: Omit<RegisterUserRequest, "password">) {
+    const existingUser = await UserRepository.findByEmail(input.email);
+
+    if (existingUser) {
+      throw new UserAlreadyExistsError(input.email);
+    }
+
+    const temporaryPassword = this.createTemporaryPassword();
+    const passwordHash = await bcrypt.hash(temporaryPassword, 12);
+    const user = await UserRepository.create({
+      name: input.name,
+      email: input.email,
+      passwordHash,
+      role: input.role,
+      tenantId: input.tenantId,
+    });
+
+    try {
+      await MailService.sendWelcomePassword({
+        email: user.email,
+        name: user.name,
+        password: temporaryPassword,
+      });
+    } catch (error) {
+      await UserRepository.delete(user.id);
+      throw error;
+    }
+
+    return {
+      user: toPublicUser(user),
     };
   }
 
@@ -98,6 +139,23 @@ class UserService {
       role: query.role,
       search: query.search,
     });
+  }
+
+  async pageData(
+    requester: { role: string; tenantId?: string },
+    query: Record<string, string | undefined>,
+  ) {
+    const users = await this.listUsers(requester, query);
+
+    return {
+      metrics: {
+        totalUsers: users.length,
+        activeUsers: users.filter((user) => user.status === "active").length,
+        suspendedUsers: users.filter((user) => user.status === "suspended").length,
+        inactiveUsers: users.filter((user) => user.status === "inactive").length,
+      },
+      users,
+    };
   }
 
   updateStatus(id: string, status: "active" | "inactive" | "suspended") {

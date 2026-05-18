@@ -1,4 +1,5 @@
 import TenantRepository from "../repositories/TenantRepository";
+import UserModel from "../../users/models/User";
 
 class TenantService {
   create(input: Record<string, unknown>) {
@@ -27,6 +28,27 @@ class TenantService {
 
   delete(id: string) {
     return TenantRepository.delete(id);
+  }
+
+  async pageData(query: Record<string, string | undefined>) {
+    const [tenants, totalTenants, activeTenants, trialTenants, platformUsers] =
+      await Promise.all([
+        this.list(query),
+        TenantRepository.countByStatus(),
+        TenantRepository.countByStatus("active"),
+        TenantRepository.countByStatus("trial"),
+        UserModel.countDocuments({}).exec(),
+      ]);
+
+    return {
+      metrics: {
+        totalTenants,
+        activeTenants,
+        trialTenants,
+        platformUsers,
+      },
+      tenants,
+    };
   }
 }
 

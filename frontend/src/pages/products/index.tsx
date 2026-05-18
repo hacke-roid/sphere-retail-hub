@@ -1,7 +1,3 @@
-import React from "react";
+import RecordsPage from "../RecordsPage";
 
-const Products = () => {
-  return <div>Product</div>;
-};
-
-export default Products;
+export default RecordsPage;

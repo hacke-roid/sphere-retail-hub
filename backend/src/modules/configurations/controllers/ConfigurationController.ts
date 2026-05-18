@@ -8,6 +8,18 @@ const resolveTenantId = (req: AuthenticatedRequest) =>
     : req.user?.tenantId;
 
 class ConfigurationController {
+  async pageData(req: AuthenticatedRequest, res: Response, next: NextFunction) {
+    try {
+      const tenantId = resolveTenantId(req);
+      if (!tenantId) return res.status(400).json({ success: false, message: "tenantId is required" });
+
+      const page = await ConfigurationService.pageData(tenantId);
+      return res.status(200).json({ success: true, page });
+    } catch (error) {
+      return next(error);
+    }
+  }
+
   async get(req: AuthenticatedRequest, res: Response, next: NextFunction) {
     try {
       const tenantId = resolveTenantId(req);

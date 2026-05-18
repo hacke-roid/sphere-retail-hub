@@ -1,101 +1,61 @@
 import { Mail, MoreHorizontal } from "lucide-react";
 import DataTable, { TableColumn } from "../../components/DataTable";
+import type { PageRecord } from "../../services/appDataService";
 
 type User = {
   id: string;
   name: string;
   email: string;
-  role: "Super Admin" | "Tenant Admin" | "Admin" | "Tenant User" | "Support";
+  role: "Super Admin" | "Shop Admin" | "Member";
   tenant: string;
-  status: "Active" | "Inactive";
+  status: "Active" | "Inactive" | "Suspended";
   lastLogin: string;
   joined: string;
 };
 
-const users: User[] = [
-  {
-    id: "1",
-    name: "Sarah Johnson",
-    email: "sarah@sphere.io",
-    role: "Super Admin",
-    tenant: "Platform",
-    status: "Active",
-    lastLogin: "2 hours ago",
-    joined: "2024-01-10",
-  },
-  {
-    id: "2",
-    name: "Dr. Patel",
-    email: "dr.patel@medstore.com",
-    role: "Tenant Admin",
-    tenant: "Medical Store Pro",
-    status: "Active",
-    lastLogin: "1 hour ago",
-    joined: "2024-01-15",
-  },
-  {
-    id: "3",
-    name: "Emma Johnson",
-    email: "emma@fashionfw.com",
-    role: "Tenant Admin",
-    tenant: "Fashion Forward",
-    status: "Active",
-    lastLogin: "30 minutes ago",
-    joined: "2024-02-20",
-  },
-  {
-    id: "4",
-    name: "Mike Chen",
-    email: "mike@sphere.io",
-    role: "Admin",
-    tenant: "Platform",
-    status: "Active",
-    lastLogin: "5 hours ago",
-    joined: "2024-01-15",
-  },
-  {
-    id: "5",
-    name: "Raj Kumar",
-    email: "raj@freshgrocery.com",
-    role: "Tenant User",
-    tenant: "Fresh Grocery",
-    status: "Inactive",
-    lastLogin: "8 days ago",
-    joined: "2024-03-10",
-  },
-  {
-    id: "6",
-    name: "Lisa Wong",
-    email: "lisa@techelectro.com",
-    role: "Tenant Admin",
-    tenant: "Tech Electronics",
-    status: "Active",
-    lastLogin: "3 hours ago",
-    joined: "2024-04-05",
-  },
-  {
-    id: "7",
-    name: "Elena Rodriguez",
-    email: "elena@sphere.io",
-    role: "Support",
-    tenant: "Platform",
-    status: "Active",
-    lastLogin: "Just now",
-    joined: "2024-01-20",
-  },
-];
+const formatText = (value: unknown) =>
+  typeof value === "string" || typeof value === "number" ? String(value) : "-";
+
+const formatDate = (value: unknown) => {
+  if (typeof value !== "string") return "-";
+
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? "-" : date.toLocaleDateString();
+};
+
+const formatRole = (role: unknown): User["role"] => {
+  if (role === "super_admin") return "Super Admin";
+  if (role === "admin") return "Shop Admin";
+  return "Member";
+};
+
+const formatStatus = (status: unknown): User["status"] => {
+  if (status === "inactive") return "Inactive";
+  if (status === "suspended") return "Suspended";
+  return "Active";
+};
+
+const mapUser = (user: PageRecord): User => ({
+  id: formatText(user.id || user._id),
+  name: formatText(user.name),
+  email: formatText(user.email),
+  role: formatRole(user.role),
+  tenant: formatText(user.tenantId) === "-" ? "Platform" : formatText(user.tenantId),
+  status: formatStatus(user.status),
+  lastLogin: formatDate(user.lastLoginAt),
+  joined: formatDate(user.createdAt),
+});
 
 const roleClass: Record<User["role"], string> = {
   "Super Admin": "table-badge badge-blue",
-  "Tenant Admin": "table-badge badge-cyan",
-  Admin: "table-badge badge-purple",
-  "Tenant User": "table-badge badge-gray",
-  Support: "table-badge badge-orange",
+  "Shop Admin": "table-badge badge-cyan",
+  Member: "table-badge badge-gray",
 };
 
 const statusClass: Record<User["status"], string> = {
   Active: "table-badge badge-green",
   Inactive: "table-badge badge-gray",
+  Suspended: "table-badge badge-red",
 };
 
 const columns: TableColumn<User>[] = [
@@ -138,13 +98,15 @@ const columns: TableColumn<User>[] = [
   },
 ];
 
-const UserTable = () => {
+const UserTable = ({ users }: { users: PageRecord[] }) => {
+  const rows = users.map(mapUser);
+
   return (
     <DataTable
       columns={columns}
-      data={users}
+      data={rows}
       rowKey="id"
-      total={3247}
+      total={rows.length}
       page={1}
       limit={7}
       renderActions={() => (

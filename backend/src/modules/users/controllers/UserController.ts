@@ -4,6 +4,23 @@ import UserAlreadyExistsError from "../errors/UserAlreadyExistsError";
 import UserService from "../services/UserService";
 
 class UserController {
+  async pageData(req: AuthenticatedRequest, res: Response, next: NextFunction) {
+    try {
+      if (!req.user) {
+        return res.status(401).json({ success: false, message: "Authentication is required" });
+      }
+
+      const page = await UserService.pageData(
+        { role: req.user.role, tenantId: req.user.tenantId },
+        req.query as Record<string, string>,
+      );
+
+      return res.status(200).json({ success: true, page });
+    } catch (error) {
+      return next(error);
+    }
+  }
+
   async list(req: AuthenticatedRequest, res: Response, next: NextFunction) {
     try {
       if (!req.user) {
@@ -33,10 +50,15 @@ class UserController {
         input.tenantId = req.user.tenantId;
       }
 
-      const result = await UserService.register(input);
+      const result = req.user
+        ? await UserService.createManagedUser(input)
+        : await UserService.register(input);
 
       return res.status(201).json({
         success: true,
+        message: req.user
+          ? "User created and password email has been sent"
+          : undefined,
         ...result,
       });
     } catch (error) {

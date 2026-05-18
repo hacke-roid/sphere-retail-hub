@@ -15,6 +15,22 @@ class ProductService {
     });
   }
 
+  async pageData(tenantId: string, query: Record<string, string | undefined>) {
+    const products = await this.list(tenantId, query);
+
+    return {
+      metrics: {
+        totalProducts: products.length,
+        availableProducts: products.filter((product) => product.isAvailable).length,
+        featuredProducts: products.filter((product) => product.isFeatured).length,
+        outOfStockProducts: products.filter(
+          (product) => (product.stockQuantity || 0) <= 0,
+        ).length,
+      },
+      products,
+    };
+  }
+
   getById(tenantId: string, id: string) {
     return ProductRepository.findById(tenantId, id);
   }

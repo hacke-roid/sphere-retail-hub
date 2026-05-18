@@ -1,15 +1,16 @@
-import React, { useMemo, useState } from "react";
+import { useMemo } from "react";
 import { AuthUser } from "../../types/auth";
 import { ActivityIcon, Building2, TrendingUp, User2 } from "lucide-react";
 import StatCard from "../../components/StatCard";
 import UserTable from "./UserTable";
+import type { PageMetrics, PageRecord } from "../../services/appDataService";
 
 const metricConfig = {
   super_admin: [
-    ["Total Tenants", "totalTenants", Building2],
-    ["Active Shops", "activeTenants", ActivityIcon],
-    ["Total Revenue", "totalRevenue", TrendingUp],
+    ["Total Users", "totalUsers", Building2],
     ["Active Users", "activeUsers", User2],
+    ["Suspended Users", "suspendedUsers", ActivityIcon],
+    ["Inactive Users", "inactiveUsers", TrendingUp],
   ],
 } as const;
 const formatMetric = (label: string, value: number | undefined) => {
@@ -26,11 +27,14 @@ const formatMetric = (label: string, value: number | undefined) => {
   return new Intl.NumberFormat("en-US").format(safeValue);
 };
 
-const Users = ({ user }: { user: AuthUser }) => {
-  const [isLoading, setIsLoading] = useState(false);
-  const [metrics, setMetrics] = useState<{ [key: string]: number | undefined }>(
-    {},
-  );
+const Users = ({
+  metrics,
+  records,
+}: {
+  user: AuthUser;
+  metrics: PageMetrics;
+  records: PageRecord[];
+}) => {
   const stats = useMemo(
     () =>
       metricConfig["super_admin"].map(([label, key, icon]) => ({
@@ -48,12 +52,12 @@ const Users = ({ user }: { user: AuthUser }) => {
             icon={icon}
             key={label}
             label={label}
-            trend={isLoading ? "Loading..." : "Live data"}
-            value={isLoading ? "..." : value}
+            trend="Live data"
+            value={value}
           />
         ))}
       </section>
-      <UserTable />
+      <UserTable users={records} />
     </>
   );
 };

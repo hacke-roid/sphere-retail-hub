@@ -12,6 +12,7 @@ const router = express.Router();
 
 router.use(authenticate);
 
+router.get("/page", authorizePermission("shop:view"), ConfigurationController.pageData);
 router.get("/", authorizePermission("shop:view"), ConfigurationController.get);
 router.put("/", authorizePermission("shop:edit"), ConfigurationController.save);
 

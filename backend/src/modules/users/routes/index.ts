@@ -9,6 +9,7 @@ import {
 } from "../../../middleware/auth";
 import UserController from "../controllers/UserController";
 import {
+  validateCreateUserRequest,
   validateForgotPasswordRequest,
   validateLoginRequest,
   validateRegisterRequest,
@@ -36,6 +37,12 @@ router.post(
 router.use(authenticate);
 
 router.get(
+  "/page",
+  authorizeAnyPermission("user:view", "member:view"),
+  UserController.pageData,
+);
+
+router.get(
   "/",
   authorizeAnyPermission("user:view", "member:view"),
   UserController.list,
@@ -50,7 +57,7 @@ router.get(
 router.post(
   "/",
   authorizeAnyPermission("user:create", "member:create"),
-  validateRegisterRequest,
+  validateCreateUserRequest,
   UserController.register,
 );
 

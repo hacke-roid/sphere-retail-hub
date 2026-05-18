@@ -9,9 +9,10 @@ type PageHeaderProps = {
 const PageHeader = ({ title, subtitle, children }: PageHeaderProps) => {
   return (
     <div className="page-header">
-      <h1>{title}</h1>
-      <p>{subtitle}</p>
-
+      <div>
+        <h1>{title}</h1>
+        <p>{subtitle}</p>
+      </div>
       {children}
     </div>
   );

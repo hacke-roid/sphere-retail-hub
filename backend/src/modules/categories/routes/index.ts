@@ -12,6 +12,7 @@ const router = express.Router();
 
 router.use(authenticate);
 
+router.get("/page", authorizePermission("category:view"), CategoryController.pageData);
 router.get("/", authorizePermission("category:view"), CategoryController.list);
 router.post("/", authorizePermission("category:create"), CategoryController.create);
 router.get("/:id", authorizePermission("category:view"), CategoryController.getById);

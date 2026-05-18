@@ -2,15 +2,15 @@ import type { LucideIcon } from "lucide-react";
 import type { UserRole } from "./auth";
 
 export type AppView =
-  // | "dashboard"
+  | "dashboard"
   | "tenants"
   | "users"
   | "products"
-  // | "categories"
-  // | "configuration"
+  | "categories"
+  | "configuration"
   | "analytics"
-  | "settings";
-// | "profile";
+  | "settings"
+  | "profile";
 
 export type NavItem = {
   id: AppView;

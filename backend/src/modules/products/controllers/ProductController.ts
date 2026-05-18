@@ -8,6 +8,18 @@ const resolveTenantId = (req: AuthenticatedRequest) =>
     : req.user?.tenantId || (req.query.tenantId as string);
 
 class ProductController {
+  async pageData(req: AuthenticatedRequest, res: Response, next: NextFunction) {
+    try {
+      const tenantId = resolveTenantId(req);
+      if (!tenantId) return res.status(400).json({ success: false, message: "tenantId is required" });
+
+      const page = await ProductService.pageData(tenantId, req.query as Record<string, string>);
+      return res.status(200).json({ success: true, page });
+    } catch (error) {
+      return next(error);
+    }
+  }
+
   async list(req: AuthenticatedRequest, res: Response, next: NextFunction) {
     try {
       const tenantId = resolveTenantId(req);
