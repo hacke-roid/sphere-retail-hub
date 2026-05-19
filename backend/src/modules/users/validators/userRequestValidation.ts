@@ -73,6 +73,47 @@ export const validateCreateUserRequest = (
   return next();
 };
 
+export const validateUpdateUserRequest = (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  const name =
+    typeof req.body.name === "string" ? req.body.name.trim() : undefined;
+  const email =
+    typeof req.body.email === "string"
+      ? normalizeEmail(req.body.email)
+      : undefined;
+  const role =
+    req.body.role === "super_admin" ||
+    req.body.role === "admin" ||
+    req.body.role === "member"
+      ? req.body.role
+      : undefined;
+  const tenantId =
+    typeof req.body.tenantId === "string" ? req.body.tenantId.trim() : undefined;
+  const status =
+    req.body.status === "active" ||
+    req.body.status === "inactive" ||
+    req.body.status === "suspended"
+      ? req.body.status
+      : undefined;
+
+  if (!name && !email && !role && tenantId === undefined && !status) {
+    return fail(res, "At least one user field is required");
+  }
+
+  req.body = {
+    ...(name ? { name } : {}),
+    ...(email ? { email } : {}),
+    ...(role ? { role } : {}),
+    ...(tenantId !== undefined ? { tenantId: tenantId || undefined } : {}),
+    ...(status ? { status } : {}),
+  };
+
+  return next();
+};
+
 export const validateLoginRequest = (
   req: Request,
   res: Response,

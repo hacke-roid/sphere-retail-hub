@@ -187,9 +187,105 @@ export type CreateUserPayload = {
   tenantId?: string;
 };
 
+export type UpdateTenantPayload = Partial<CreateTenantPayload>;
+
+export type UpdateUserPayload = {
+  name?: string;
+  email?: string;
+  role?: "super_admin" | "admin" | "member";
+  tenantId?: string;
+  status?: "active" | "inactive" | "suspended";
+};
+
 export type TenantOption = {
   id: string;
   name: string;
+};
+
+export type CategoryOption = {
+  id: string;
+  name: string;
+  icon?: string;
+  imageUrl?: string;
+};
+
+export type ProductPayload = {
+  name: string;
+  categoryId?: string;
+  description?: string;
+  images: string[];
+  price: number;
+  stockQuantity: number;
+  showStock: boolean;
+  isAvailable: boolean;
+  isFeatured: boolean;
+  tags: string[];
+};
+
+export type CategoryPayload = {
+  name: string;
+  description?: string;
+  icon?: string;
+  imageUrl?: string;
+  parentId?: string;
+  isActive: boolean;
+};
+
+export type ShopConfiguration = {
+  tenantId?: string;
+  shopName: string;
+  logoUrl?: string;
+  theme: {
+    primaryColor?: string;
+    secondaryColor?: string;
+    accentColor?: string;
+    fontFamily?: string;
+    layout?: string;
+    wideLayout?: boolean;
+    cardShadows?: boolean;
+    roundedCorners?: boolean;
+  };
+  contact: {
+    email?: string;
+    phone?: string;
+    address?: string;
+  };
+  homepage: {
+    sections: {
+      bannerCarousel: boolean;
+      categoryShowcase: boolean;
+      featuredProducts: boolean;
+      latestProducts: boolean;
+      bestSellers: boolean;
+    };
+    productsPerRow: number;
+    itemsPerPage: number;
+    banners: Array<{
+      id: string;
+      title: string;
+      subtitle?: string;
+      imageUrl?: string;
+      buttonLabel?: string;
+      categoryId?: string;
+      tone?: string;
+    }>;
+    categoryShowcase: Array<{
+      id: string;
+      categoryId: string;
+      title?: string;
+      imageUrl?: string;
+    }>;
+  };
+  features: {
+    productSearch: boolean;
+    wishlist: boolean;
+    productReviews: boolean;
+    filters: boolean;
+    sorting: boolean;
+    addToCart: boolean;
+    orderHistory: boolean;
+    productRecommendations: boolean;
+  };
 };
 
 export const createTenant = (payload: CreateTenantPayload, token: string) =>
@@ -203,6 +299,52 @@ export const createUser = (payload: CreateUserPayload, token: string) =>
   request<{ success: boolean; user: PageRecord }>("/v1/api/users", {
     method: "POST",
     body: JSON.stringify(payload),
+    token,
+  });
+
+export const getTenant = (id: string, token: string) =>
+  request<{ success: boolean; tenant: PageRecord }>(`/v1/api/tenants/${id}`, {
+    method: "GET",
+    token,
+  });
+
+export const updateTenant = (
+  id: string,
+  payload: UpdateTenantPayload,
+  token: string,
+) =>
+  request<{ success: boolean; tenant: PageRecord }>(`/v1/api/tenants/${id}`, {
+    method: "PUT",
+    body: JSON.stringify(payload),
+    token,
+  });
+
+export const deleteTenant = (id: string, token: string) =>
+  request<Record<string, never>>(`/v1/api/tenants/${id}`, {
+    method: "DELETE",
+    token,
+  });
+
+export const getUser = (id: string, token: string) =>
+  request<{ success: boolean; user: PageRecord }>(`/v1/api/users/${id}`, {
+    method: "GET",
+    token,
+  });
+
+export const updateUser = (
+  id: string,
+  payload: UpdateUserPayload,
+  token: string,
+) =>
+  request<{ success: boolean; user: PageRecord }>(`/v1/api/users/${id}`, {
+    method: "PUT",
+    body: JSON.stringify(payload),
+    token,
+  });
+
+export const deleteUser = (id: string, token: string) =>
+  request<Record<string, never>>(`/v1/api/users/${id}`, {
+    method: "DELETE",
     token,
   });
 
@@ -220,4 +362,115 @@ export const searchTenants = async (token: string, search = "") => {
     id: String(tenant.id || tenant._id || ""),
     name: String(tenant.name || "Unnamed Tenant"),
   }));
+};
+
+export const getConfiguration = (token: string) =>
+  request<{ success: boolean; configuration: ShopConfiguration | null }>(
+    "/v1/api/configurations",
+    {
+      method: "GET",
+      token,
+    },
+  );
+
+export const saveConfiguration = (payload: ShopConfiguration, token: string) =>
+  request<{ success: boolean; configuration: ShopConfiguration }>(
+    "/v1/api/configurations",
+    {
+      method: "PUT",
+      body: JSON.stringify(payload),
+      token,
+    },
+  );
+
+export const listCategories = async (token: string): Promise<CategoryOption[]> => {
+  const response = await request<{ success: boolean; categories: PageRecord[] }>(
+    "/v1/api/categories",
+    {
+      method: "GET",
+      token,
+    },
+  );
+
+  return response.categories
+    .filter((category) => category.isActive !== false)
+    .map((category) => ({
+      id: String(category.id || category._id || ""),
+      name: String(category.name || "Unnamed Category"),
+      icon: typeof category.icon === "string" ? category.icon : undefined,
+      imageUrl: typeof category.imageUrl === "string" ? category.imageUrl : undefined,
+    }))
+    .filter((category) => category.id);
+};
+
+export const createProduct = (payload: ProductPayload, token: string) =>
+  request<{ success: boolean; product: PageRecord }>("/v1/api/products", {
+    method: "POST",
+    body: JSON.stringify(payload),
+    token,
+  });
+
+export const getProduct = (id: string, token: string) =>
+  request<{ success: boolean; product: PageRecord }>(`/v1/api/products/${id}`, {
+    method: "GET",
+    token,
+  });
+
+export const updateProduct = (id: string, payload: ProductPayload, token: string) =>
+  request<{ success: boolean; product: PageRecord }>(`/v1/api/products/${id}`, {
+    method: "PUT",
+    body: JSON.stringify(payload),
+    token,
+  });
+
+export const deleteProduct = (id: string, token: string) =>
+  request<Record<string, never>>(`/v1/api/products/${id}`, {
+    method: "DELETE",
+    token,
+  });
+
+export const createCategory = (payload: CategoryPayload, token: string) =>
+  request<{ success: boolean; category: PageRecord }>("/v1/api/categories", {
+    method: "POST",
+    body: JSON.stringify(payload),
+    token,
+  });
+
+export const getCategory = (id: string, token: string) =>
+  request<{ success: boolean; category: PageRecord }>(`/v1/api/categories/${id}`, {
+    method: "GET",
+    token,
+  });
+
+export const updateCategory = (id: string, payload: CategoryPayload, token: string) =>
+  request<{ success: boolean; category: PageRecord }>(`/v1/api/categories/${id}`, {
+    method: "PUT",
+    body: JSON.stringify(payload),
+    token,
+  });
+
+export const deleteCategory = (id: string, token: string) =>
+  request<Record<string, never>>(`/v1/api/categories/${id}`, {
+    method: "DELETE",
+    token,
+  });
+
+export const uploadImage = (file: File, token: string) => {
+  const formData = new FormData();
+  formData.append("image", file);
+
+  return request<{
+    success: boolean;
+    upload: {
+      publicId: string;
+      url: string;
+      width: number;
+      height: number;
+      format: string;
+    };
+  }>("/v1/api/uploads/image", {
+    method: "POST",
+    body: formData,
+    token,
+  });
 };

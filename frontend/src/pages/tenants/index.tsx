@@ -33,10 +33,12 @@ const Tenants = ({
   user,
   metrics,
   records,
+  onRefresh,
 }: {
   user: AuthUser;
   metrics: PageMetrics;
   records: PageRecord[];
+  onRefresh: () => void;
 }) => {
   if (!user) {
     return <Navigate to="/login" replace />;
@@ -63,7 +65,7 @@ const Tenants = ({
           />
         ))}
       </section>
-      <TenantTable tenants={records} />
+      <TenantTable onRefresh={onRefresh} tenants={records} />
     </>
   );
 };

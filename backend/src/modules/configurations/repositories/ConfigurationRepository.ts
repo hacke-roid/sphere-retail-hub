@@ -8,7 +8,7 @@ class ConfigurationRepository {
   async upsert(tenantId: string, input: Record<string, unknown>) {
     return ShopConfigurationModel.findOneAndUpdate(
       { tenantId },
-      { ...input, tenantId },
+      { $set: { ...input, tenantId } },
       { new: true, upsert: true },
     )
       .lean()

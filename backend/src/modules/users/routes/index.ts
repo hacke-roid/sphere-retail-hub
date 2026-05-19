@@ -14,6 +14,7 @@ import {
   validateLoginRequest,
   validateRegisterRequest,
   validateResetPasswordRequest,
+  validateUpdateUserRequest,
 } from "../validators/userRequestValidation";
 
 const router = express.Router();
@@ -54,6 +55,12 @@ router.get(
   UserController.getMe,
 );
 
+router.get(
+  "/:id",
+  authorizeAnyPermission("user:view", "member:view"),
+  UserController.getById,
+);
+
 router.post(
   "/",
   authorizeAnyPermission("user:create", "member:create"),
@@ -65,6 +72,13 @@ router.patch(
   "/:id/status",
   authorizeAnyPermission("user:edit", "member:edit"),
   UserController.updateStatus,
+);
+
+router.put(
+  "/:id",
+  authorizeAnyPermission("user:edit", "member:edit", "profile:edit"),
+  validateUpdateUserRequest,
+  UserController.updateUser,
 );
 
 router.delete(

@@ -1,5 +1,7 @@
 import { Eye, Github, Mail } from "lucide-react";
+import { Loader } from "../components/Loader";
 import { FormEvent, useState } from "react";
+import { Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
 const LoginPage = () => {
@@ -44,9 +46,9 @@ const LoginPage = () => {
           <label className="field">
             <span className="field-row">
               Password
-              <button className="link-button" type="button">
+              <Link className="link-button" to="/forgot-password">
                 Forgot?
-              </button>
+              </Link>
             </span>
             <span className="password-control">
               <input
@@ -76,7 +78,7 @@ const LoginPage = () => {
             disabled={isLoading}
             type="submit"
           >
-            {isLoading ? "Signing In..." : "Sign In"}
+            {isLoading ? <Loader message="Signing in" variant="button" /> : "Sign In"}
           </button>
 
           <div className="divider">
@@ -97,7 +99,7 @@ const LoginPage = () => {
           </div>
 
           <p className="signup-copy">
-            Don't have an account? <button type="button">Sign up</button>
+            Don't have an account? <Link to="/signup">Sign up</Link>
           </p>
         </form>
       </section>

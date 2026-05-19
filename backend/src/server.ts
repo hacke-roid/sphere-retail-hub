@@ -45,9 +45,28 @@ app.use((error: Error, req: Request, res: Response, next: NextFunction) => {
 
   if (
     error.message.startsWith("SMTP email is not configured") ||
-    error.message.startsWith("Unable to send password email")
+    error.message.startsWith("Unable to send password email") ||
+    error.message.startsWith("CDN upload is not configured")
   ) {
     return res.status(503).json({
+      success: false,
+      message: error.message,
+    });
+  }
+
+  if (error.message === "Member account is not assigned to a tenant") {
+    return res.status(400).json({
+      success: false,
+      message: error.message,
+    });
+  }
+
+  if (
+    error.message === "Category name is required" ||
+    error.message === "Product name is required" ||
+    error.message === "Only image uploads are allowed"
+  ) {
+    return res.status(400).json({
       success: false,
       message: error.message,
     });

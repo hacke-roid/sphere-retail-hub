@@ -76,7 +76,12 @@ const Settings = ({ records }: SettingsProps) => {
       records.length
         ? records.slice(0, 5)
         : [
-            { id: "owner", name: "Super Admin", email: "superadmin@example.com", role: "Super Admin" },
+            {
+              id: "owner",
+              name: "Super Admin",
+              email: "superadmin@example.com",
+              role: "Super Admin",
+            },
           ],
     [records],
   );
@@ -139,7 +144,9 @@ const Settings = ({ records }: SettingsProps) => {
           <div className="settings-divider" />
           <h3>Platform Logo</h3>
           <button className="upload-box" type="button">
-            <span><Camera size={22} /></span>
+            <span>
+              <Camera size={22} />
+            </span>
             <strong>Click to upload</strong>
             <small>or drag and drop</small>
           </button>
@@ -156,8 +163,16 @@ const Settings = ({ records }: SettingsProps) => {
         <article className="settings-panel">
           <h2>Notification Preferences</h2>
           {[
-            ["New Tenant Registration", "Get notified when a new tenant signs up", true],
-            ["Payment Received", "Notify when subscription payments are received", true],
+            [
+              "New Tenant Registration",
+              "Get notified when a new tenant signs up",
+              true,
+            ],
+            [
+              "Payment Received",
+              "Notify when subscription payments are received",
+              true,
+            ],
             ["System Alerts", "Critical system and security alerts", true],
             ["Weekly Report", "Weekly platform activity summary", false],
             ["User Activity", "Notify on unusual user activity", false],
@@ -253,8 +268,9 @@ const Settings = ({ records }: SettingsProps) => {
             ))}
           </div>
           <div className="settings-actions">
-            <button className="secondary-button" type="button">Cancel</button>
-            <button className="primary-button" type="button">Add Team Member</button>
+            <button className="primary-button" type="button">
+              Add Team Member
+            </button>
           </div>
         </article>
       )}
@@ -266,8 +282,12 @@ const Settings = ({ records }: SettingsProps) => {
             <span>Current Plan</span>
             <strong>Enterprise Plan</strong>
             <p>$9,999/month - Unlimited tenants & users</p>
-            <p>Your subscription renews on <b>May 15, 2025</b></p>
-            <button className="primary-button" type="button">Manage Subscription</button>
+            <p>
+              Your subscription renews on <b>May 15, 2025</b>
+            </p>
+            <button className="primary-button" type="button">
+              Manage Subscription
+            </button>
           </div>
           <div className="settings-divider" />
           <h3>Billing History</h3>
