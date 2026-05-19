@@ -122,6 +122,26 @@ class UserController {
     }
   }
 
+  async getById(req: Request, res: Response, next: NextFunction) {
+    try {
+      const user = await UserService.getById(String(req.params.id));
+
+      if (!user) {
+        return res.status(404).json({
+          success: false,
+          message: "User not found",
+        });
+      }
+
+      return res.status(200).json({
+        success: true,
+        user,
+      });
+    } catch (error) {
+      return next(error);
+    }
+  }
+
   async forgotPassword(req: Request, res: Response, next: NextFunction) {
     try {
       const result = await UserService.forgotPassword(req.body);
@@ -159,6 +179,27 @@ class UserController {
   async updateStatus(req: Request, res: Response, next: NextFunction) {
     try {
       const user = await UserService.updateStatus(String(req.params.id), req.body.status);
+
+      if (!user) {
+        return res.status(404).json({ success: false, message: "User not found" });
+      }
+
+      return res.status(200).json({ success: true, user });
+    } catch (error) {
+      return next(error);
+    }
+  }
+
+  async updateUser(req: AuthenticatedRequest, res: Response, next: NextFunction) {
+    try {
+      if (req.user?.role === "member" && req.user.id !== String(req.params.id)) {
+        return res.status(403).json({
+          success: false,
+          message: "You can only update your own account",
+        });
+      }
+
+      const user = await UserService.updateUser(String(req.params.id), req.body);
 
       if (!user) {
         return res.status(404).json({ success: false, message: "User not found" });

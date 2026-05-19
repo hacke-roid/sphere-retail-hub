@@ -96,6 +96,12 @@ class UserService {
     return user ? toPublicUser(user) : undefined;
   }
 
+  async getById(id: string) {
+    const user = await UserRepository.findById(id);
+
+    return user ? toPublicUser(user) : undefined;
+  }
+
   async forgotPassword(input: ForgotPasswordRequest) {
     const user = await UserRepository.findByEmail(input.email);
 
@@ -160,6 +166,21 @@ class UserService {
 
   updateStatus(id: string, status: "active" | "inactive" | "suspended") {
     return UserRepository.updateStatus(id, status);
+  }
+
+  async updateUser(
+    id: string,
+    input: {
+      name?: string;
+      email?: string;
+      role?: "super_admin" | "admin" | "member";
+      tenantId?: string;
+      status?: "active" | "inactive" | "suspended";
+    },
+  ) {
+    const user = await UserRepository.update(id, input);
+
+    return user ? toPublicUser(user) : undefined;
   }
 
   deleteUser(id: string) {

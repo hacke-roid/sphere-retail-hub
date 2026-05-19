@@ -4,6 +4,7 @@ export type ProductRecord = {
   id: string;
   tenantId: string;
   categoryId?: string;
+  categoryName?: string;
   name: string;
   description?: string;
   images: string[];

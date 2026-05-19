@@ -30,10 +30,12 @@ const formatMetric = (label: string, value: number | undefined) => {
 const Users = ({
   metrics,
   records,
+  onRefresh,
 }: {
   user: AuthUser;
   metrics: PageMetrics;
   records: PageRecord[];
+  onRefresh: () => void;
 }) => {
   const stats = useMemo(
     () =>
@@ -57,7 +59,7 @@ const Users = ({
           />
         ))}
       </section>
-      <UserTable users={records} />
+      <UserTable onRefresh={onRefresh} users={records} />
     </>
   );
 };

@@ -19,6 +19,7 @@ type AuthState = {
   hasAssignedRole: () => boolean;
   login: (payload: LoginRequest) => Promise<void>;
   logout: () => void;
+  refreshUser: () => Promise<void>;
   clearError: () => void;
 };
 
@@ -107,6 +108,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     clearSession();
   };
 
+  const refreshUser = async () => {
+    if (!token) return;
+
+    const response = await getMe(token);
+    saveSession(token, response.user);
+  };
+
   const value = useMemo(
     () => ({
       user,
@@ -117,6 +125,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       hasAssignedRole: () => Boolean(user?.role),
       login,
       logout,
+      refreshUser,
       clearError: () => setError(""),
     }),
     [user, token, isLoading, error, clearSession, saveSession],

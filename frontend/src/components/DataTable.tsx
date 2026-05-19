@@ -17,7 +17,7 @@ type DataTableProps<T> = {
   limit?: number;
   onNext?: () => void;
   onPrevious?: () => void;
-  renderActions?: (row: T) => ReactNode;
+  renderActions?: (row: T, index: number) => ReactNode;
 };
 
 const DataTable = <T extends Record<string, any>>({
@@ -64,7 +64,7 @@ const DataTable = <T extends Record<string, any>>({
                 </td>
               </tr>
             ) : (
-              data.map((row) => (
+              data.map((row, index) => (
                 <tr key={String(row[rowKey])}>
                   {columns.map((column) => (
                     <td
@@ -78,7 +78,7 @@ const DataTable = <T extends Record<string, any>>({
                   ))}
 
                   {renderActions && (
-                    <td className="text-center">{renderActions(row)}</td>
+                    <td className="text-center">{renderActions(row, index)}</td>
                   )}
                 </tr>
               ))

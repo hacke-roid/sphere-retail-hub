@@ -21,6 +21,14 @@ export type CreateUserInput = {
   tenantId?: string;
 };
 
+export type UpdateUserInput = {
+  name?: string;
+  email?: string;
+  role?: "super_admin" | "admin" | "member";
+  tenantId?: string;
+  status?: "active" | "inactive" | "suspended";
+};
+
 const toUserRecord = (user: UserDocument): UserRecord => ({
   id: user._id.toString(),
   name: user.name,
@@ -62,6 +70,24 @@ class UserRepository {
 
   async updatePassword(id: string, passwordHash: string) {
     await UserModel.findByIdAndUpdate(id, { passwordHash }).exec();
+  }
+
+  async update(id: string, input: UpdateUserInput) {
+    try {
+      const user = await UserModel.findByIdAndUpdate(
+        id,
+        input,
+        { new: true },
+      ).exec();
+
+      return user ? toUserRecord(user) : undefined;
+    } catch (error: any) {
+      if (error.code === 11000 && error.keyPattern?.email) {
+        throw new UserAlreadyExistsError(input.email || "this email");
+      }
+
+      throw error;
+    }
   }
 
   async list(filter: { tenantId?: string; role?: string; search?: string }) {

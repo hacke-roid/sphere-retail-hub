@@ -1,5 +1,6 @@
 import { Activity, Building2, Package, TrendingUp, Users } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
+import { Loader } from "../../components/Loader";
 import StatCard from "../../components/StatCard";
 import PageHeader from "../../components/PageHeader";
 import { useAuth } from "../../context/AuthContext";
@@ -126,43 +127,49 @@ const DashboardPage = ({ user }: { user: AuthUser }) => {
 
       {error && <div className="content-message error">{error}</div>}
 
-      <section className="stats-grid">
-        {stats.map(({ icon, label, value }) => (
-          <StatCard
-            icon={icon}
-            key={label}
-            label={label}
-            trend={isLoading ? "Loading..." : "Live data"}
-            value={isLoading ? "..." : value}
-          />
-        ))}
-      </section>
+      {isLoading ? (
+        <Loader message="Loading dashboard" variant="inline" />
+      ) : (
+        <>
+          <section className="stats-grid">
+            {stats.map(({ icon, label, value }) => (
+              <StatCard
+                icon={icon}
+                key={label}
+                label={label}
+                trend="Live data"
+                value={value}
+              />
+            ))}
+          </section>
 
-      <section className="dashboard-grid">
-        <article className="chart-card revenue-card">
-          <h2>Revenue Trend</h2>
-          <p>Monthly revenue from recorded transactions</p>
-          <div className="empty-panel">No revenue records yet</div>
-        </article>
+          <section className="dashboard-grid">
+            <article className="chart-card revenue-card">
+              <h2>Revenue Trend</h2>
+              <p>Monthly revenue from recorded transactions</p>
+              <div className="empty-panel">No revenue records yet</div>
+            </article>
 
-        <article className="chart-card">
-          <h2>{user.role === "member" ? "Product Types" : "Tenant Types"}</h2>
-          <p>Distribution by category</p>
-          {tenantTypes.length ? (
-            <ul className="chart-legend data-list">
-              {tenantTypes.map((item) => (
-                <li key={item.type}>
-                  <span className="dot blue" />
-                  {item.type}
-                  <strong>{item.count}</strong>
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <div className="empty-panel">No category data yet</div>
-          )}
-        </article>
-      </section>
+            <article className="chart-card">
+              <h2>{user.role === "member" ? "Product Types" : "Tenant Types"}</h2>
+              <p>Distribution by category</p>
+              {tenantTypes.length ? (
+                <ul className="chart-legend data-list">
+                  {tenantTypes.map((item) => (
+                    <li key={item.type}>
+                      <span className="dot blue" />
+                      {item.type}
+                      <strong>{item.count}</strong>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <div className="empty-panel">No category data yet</div>
+              )}
+            </article>
+          </section>
+        </>
+      )}
     </main>
   );
 };

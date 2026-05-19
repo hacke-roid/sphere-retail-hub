@@ -9,8 +9,9 @@ export const request = async <T>(
   options: RequestOptions = {},
 ): Promise<T> => {
   const headers = new Headers(options.headers);
+  const isFormData = options.body instanceof FormData;
 
-  if (!headers.has("Content-Type") && options.body) {
+  if (!headers.has("Content-Type") && options.body && !isFormData) {
     headers.set("Content-Type", "application/json");
   }
 

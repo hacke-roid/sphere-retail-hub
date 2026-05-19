@@ -5,9 +5,13 @@ export type CategoryRecord = {
   tenantId: string;
   name: string;
   description?: string;
+  icon?: string;
+  imageUrl?: string;
   parentId?: string;
   isActive: boolean;
   createdAt: string;
+  productCount?: number;
+  subcategoryCount?: number;
 };
 
 const toCategoryRecord = (category: CategoryDocument): CategoryRecord => ({
@@ -15,6 +19,8 @@ const toCategoryRecord = (category: CategoryDocument): CategoryRecord => ({
   tenantId: category.tenantId,
   name: category.name,
   description: category.description,
+  icon: category.icon,
+  imageUrl: category.imageUrl,
   parentId: category.parentId,
   isActive: category.isActive,
   createdAt: category.createdAt.toISOString(),

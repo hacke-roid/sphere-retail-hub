@@ -14,3 +14,25 @@ export const getMe = (token: string) => {
     token,
   });
 };
+
+export const registerUser = (payload: {
+  name: string;
+  email: string;
+  password: string;
+}) => {
+  return request<LoginResponse>("/v1/api/users/register", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+};
+
+export const forgotPassword = (payload: { email: string }) => {
+  return request<{
+    success: boolean;
+    message: string;
+    resetToken?: string;
+  }>("/v1/api/users/forgot-password", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+};

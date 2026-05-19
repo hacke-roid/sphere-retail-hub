@@ -2,6 +2,7 @@ import { ComponentType, useEffect, useState } from "react";
 import { CalendarDays, Download, Plus } from "lucide-react";
 import AddTenantModal from "../components/AddTenantModal";
 import AddUserModal from "../components/AddUserModal";
+import { Loader } from "../components/Loader";
 import PageHeader from "../components/PageHeader";
 import { useAuth } from "../context/AuthContext";
 import {
@@ -15,8 +16,10 @@ import type { AuthUser } from "../types/auth";
 import Tenants from "./tenants";
 import Users from "./users";
 import Products from "./products";
+import Categories from "./categories";
 import Analytics from "./analytics";
 import Settings from "./settings";
+import Configuration from "./configuration";
 import RecordsPage from "./RecordsPage";
 
 type PageComponentProps = {
@@ -52,12 +55,12 @@ const labels: Partial<Record<AppView, PageLabel>> = {
   categories: {
     title: "Categories",
     subtitle: "Create nested catalog categories",
-    component: RecordsPage,
+    component: Categories,
   },
   configuration: {
     title: "Shop Configuration",
-    subtitle: "Manage branding, contact, banners, and business hours",
-    component: RecordsPage,
+    subtitle: "Configure your shop appearance and features for the member portal",
+    component: Configuration,
   },
   analytics: {
     title: "Platform Analytics",
@@ -193,7 +196,7 @@ const PlaceholderPage = ({ view }: { view: AppView }) => {
         </div>
       </PageHeader>
 
-      {isLoading && <div className="content-message">Loading...</div>}
+      {isLoading && <Loader message={`Loading ${page.title}`} variant="inline" />}
 
       {!isLoading && error && (
         <div className="content-message error">{error}</div>
