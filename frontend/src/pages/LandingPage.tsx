@@ -57,11 +57,11 @@ const LandingPage = () => (
 
     <section className="landing-hero">
       <span className="hero-pill">Welcome to Sphere Platform</span>
-      <h1>Premium Multi-Tenant Retail Platform</h1>
+      <h1>Multi-Tenant Retail Platform</h1>
       <p>
-        A modern, scalable SaaS solution for managing multiple retail businesses.
-        Support medical shops, clothing stores, grocery stores, electronics stores,
-        and more.
+        A modern, scalable SaaS solution for managing multiple retail
+        businesses. Support medical shops, clothing stores, grocery stores,
+        electronics stores, and more.
       </p>
       <div className="landing-hero-actions">
         <Link className="primary-button hero-button" to="/signup">
