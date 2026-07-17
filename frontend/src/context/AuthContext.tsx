@@ -9,6 +9,8 @@ import {
 } from "react";
 import { getMe, loginUser } from "../services/authService";
 import type { AuthUser, LoginRequest } from "../types/auth";
+import { io, Socket } from "socket.io-client";
+import { API_BASE_URL } from "../config/env";
 
 type AuthState = {
   user: AuthUser | null;
@@ -28,6 +30,14 @@ const AuthContext = createContext<AuthState | undefined>(undefined);
 const storageKeys = {
   token: "sphere.auth.token",
   user: "sphere.auth.user",
+};
+
+const getSocketBaseUrl = () => {
+  try {
+    return new URL(API_BASE_URL).origin;
+  } catch {
+    return API_BASE_URL.replace(/(?:\/v1)?\/api\/?$/, "");
+  }
 };
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
@@ -52,13 +62,18 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     const storedToken = localStorage.getItem(storageKeys.token);
-
     if (!storedToken) {
       clearSession();
       setIsLoading(false);
       return;
     }
 
+    let socket: Socket | null = io(getSocketBaseUrl(), {
+      transports: ["websocket"],
+      auth: {
+        token: storedToken,
+      },
+    });
     let isMounted = true;
 
     const validateSession = async () => {
@@ -97,7 +112,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       saveSession(loginResponse.token, meResponse.user);
     } catch (loginError) {
       clearSession();
-      setError(loginError instanceof Error ? loginError.message : "Login failed");
+      setError(
+        loginError instanceof Error ? loginError.message : "Login failed",
+      );
       throw loginError;
     } finally {
       setIsLoading(false);

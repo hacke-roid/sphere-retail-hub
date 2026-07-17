@@ -53,3 +53,4 @@ coverage/
 *.key
 .DS_Store?
 ._*
+.vercel

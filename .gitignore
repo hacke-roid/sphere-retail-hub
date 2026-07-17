@@ -67,8 +67,8 @@ coverage/
 # yarn.lock
 
 # Uploads/Generated files
-uploads/
-public/uploads/
+/uploads/
+/public/uploads/
 dist/
 build/
 

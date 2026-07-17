@@ -1,0 +1,151 @@
+name: Deploy retail hub to Vercel
+
+on:
+  push:
+    branches:
+      - main
+    tags:
+      - "Y*-W*-RC*"
+      - "v*"
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    name: Validate release reference
+    runs-on: ubuntu-latest
+    outputs:
+      environment: ${{ steps.target.outputs.environment }}
+      backend_project_id: ${{ steps.target.outputs.backend_project_id }}
+      frontend_project_id: ${{ steps.target.outputs.frontend_project_id }}
+      backend_url: ${{ steps.target.outputs.backend_url }}
+      frontend_url: ${{ steps.target.outputs.frontend_url }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Select and validate deployment target
+        id: target
+        shell: bash
+        run: |
+          if [[ "$GITHUB_REF" == "refs/heads/main" ]]; then
+            echo "environment=staging" >> "$GITHUB_OUTPUT"
+            echo "backend_project_id=prj_HJkQQrF5TaBCM3FAJ4Qi6h1fpaSV" >> "$GITHUB_OUTPUT"
+            echo "frontend_project_id=prj_SDkQQ55CY6PCkBvd2b3R75Z0Yk7c" >> "$GITHUB_OUTPUT"
+            echo "backend_url=https://sphere-retail-hub.vercel.app" >> "$GITHUB_OUTPUT"
+            echo "frontend_url=https://sphere-retail-hub-k6ze.vercel.app" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          if [[ "$GITHUB_REF_NAME" =~ ^(Y[0-9]{4}-W[0-9]{2})-RC[1-9][0-9]*$ ]]; then
+            release_branch="release/${BASH_REMATCH[1]}"
+            if ! git show-ref --verify --quiet "refs/remotes/origin/$release_branch" ||
+               ! git merge-base --is-ancestor "$GITHUB_SHA" "origin/$release_branch"; then
+              echo "The tagged commit must belong to origin/$release_branch."
+              exit 1
+            fi
+
+            echo "environment=pre-production" >> "$GITHUB_OUTPUT"
+            echo "backend_project_id=prj_T0esaFIZ86sAFwwSWjfxG9petFKX" >> "$GITHUB_OUTPUT"
+            echo "frontend_project_id=prj_EXU0ALqLvhEvXVaLkAbreuG8fZLa" >> "$GITHUB_OUTPUT"
+            echo "backend_url=https://sphere-retail-hub-pre-prod-backend.vercel.app" >> "$GITHUB_OUTPUT"
+            echo "frontend_url=https://sphere-retail-hub-pre-production.vercel.app" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          if [[ "$GITHUB_REF_NAME" =~ ^v[0-9]+\.[0-9]+(\.[0-9]+)?$ ]]; then
+            if ! git tag --points-at "$GITHUB_SHA" | grep -Eq '^Y[0-9]{4}-W[0-9]{2}-RC[1-9][0-9]*$'; then
+              echo "Production must use the exact commit previously deployed with an RC tag."
+              exit 1
+            fi
+
+            echo "environment=production" >> "$GITHUB_OUTPUT"
+            echo "backend_project_id=prj_n1ixsxQ52R1yC1hfHROyxwuaxjZT" >> "$GITHUB_OUTPUT"
+            echo "frontend_project_id=prj_hV9BbE5LwY9NceYgnGY4ZaGMHdq0" >> "$GITHUB_OUTPUT"
+            echo "backend_url=https://sphere-retail-hub-production-backen.vercel.app" >> "$GITHUB_OUTPUT"
+            echo "frontend_url=https://sphere-retail-hub-production.vercel.app" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          echo "Unsupported deployment reference: $GITHUB_REF_NAME"
+          exit 1
+
+  deploy:
+    name: Deploy ${{ needs.validate.outputs.environment }}
+    needs: validate
+    runs-on: ubuntu-latest
+    environment: ${{ needs.validate.outputs.environment }}
+    concurrency:
+      group: vercel-${{ needs.validate.outputs.environment }}
+      cancel-in-progress: false
+    env:
+      VERCEL_ORG_ID: team_w5AelyzWOyesXK7Ftl6YAfce
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+    steps:
+      - name: Checkout validated commit
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: |
+            backend/package-lock.json
+            frontend/package-lock.json
+
+      - name: Install backend dependencies
+        run: npm ci
+        working-directory: backend
+
+      - name: Install frontend dependencies
+        run: npm ci
+        working-directory: frontend
+
+      - name: Install Vercel CLI
+        run: npm install --global vercel@latest
+
+      - name: Pull backend configuration
+        run: vercel pull --yes --environment=production --token="$VERCEL_TOKEN"
+        working-directory: backend
+        env:
+          VERCEL_PROJECT_ID: ${{ needs.validate.outputs.backend_project_id }}
+
+      - name: Build backend
+        run: vercel build --prod --token="$VERCEL_TOKEN"
+        working-directory: backend
+        env:
+          VERCEL_PROJECT_ID: ${{ needs.validate.outputs.backend_project_id }}
+
+      - name: Deploy backend
+        run: vercel deploy --prebuilt --prod --token="$VERCEL_TOKEN"
+        working-directory: backend
+        env:
+          VERCEL_PROJECT_ID: ${{ needs.validate.outputs.backend_project_id }}
+
+      - name: Verify backend health
+        run: curl --fail --retry 6 --retry-delay 5 --retry-all-errors "${{ needs.validate.outputs.backend_url }}/health"
+
+      - name: Pull frontend configuration
+        run: vercel pull --yes --environment=production --token="$VERCEL_TOKEN"
+        working-directory: frontend
+        env:
+          VERCEL_PROJECT_ID: ${{ needs.validate.outputs.frontend_project_id }}
+
+      - name: Build frontend
+        run: vercel build --prod --token="$VERCEL_TOKEN"
+        working-directory: frontend
+        env:
+          VERCEL_PROJECT_ID: ${{ needs.validate.outputs.frontend_project_id }}
+
+      - name: Deploy frontend
+        run: vercel deploy --prebuilt --prod --token="$VERCEL_TOKEN"
+        working-directory: frontend
+        env:
+          VERCEL_PROJECT_ID: ${{ needs.validate.outputs.frontend_project_id }}
+
+      - name: Verify frontend
+        run: curl --fail --retry 6 --retry-delay 5 --retry-all-errors "${{ needs.validate.outputs.frontend_url }}"
