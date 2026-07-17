@@ -3,6 +3,8 @@ import express, { NextFunction, Request, Response } from "express";
 import loadRoutes from "./routers";
 import { connectDatabase } from "./db/mongoose";
 import "dotenv/config";
+import { createServer } from "http";
+import initSocketServer from "./realtime/socketServer";
 
 const app = express();
 const apiRouter = express.Router();
@@ -77,10 +79,12 @@ app.use((error: Error, req: Request, res: Response, next: NextFunction) => {
     message: "Internal server error",
   });
 });
+const httpServer = createServer(app);
+initSocketServer(httpServer, CORS_ORIGIN);
 
 connectDatabase()
   .then(() => {
-    app.listen(port, () => {
+    httpServer.listen(port, () => {
       console.log(`Server is running at http://localhost:${port}`);
     });
   })

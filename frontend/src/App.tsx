@@ -22,6 +22,7 @@ import SettingsRouter from "./routers/settings";
 import TenantsRouter from "./routers/tenants";
 import UsersRouter from "./routers/users";
 import { Loader } from "./components/Loader";
+import { SocketProvider } from "./context/SocketContext";
 
 const AppShell = () => {
   const { hasAssignedRole, isAuthenticated, isLoading, user } = useAuth();
@@ -58,16 +59,25 @@ const AppShell = () => {
         <MemberLayout>
           <Routes>
             <Route path="/" element={<Navigate to="/shop" replace />} />
-            <Route path="/dashboard" element={<Navigate to="/shop" replace />} />
+            <Route
+              path="/dashboard"
+              element={<Navigate to="/shop" replace />}
+            />
             <Route path="/products" element={<Navigate to="/shop" replace />} />
-            <Route path="/profile" element={<Navigate to="/account" replace />} />
+            <Route
+              path="/profile"
+              element={<Navigate to="/account" replace />}
+            />
             <Route path="/shop" element={<ShopPage />} />
             <Route path="/account" element={<AccountPage />} />
             <Route path="/orders" element={<OrdersPage />} />
             <Route path="/wishlist" element={<WishlistPage />} />
             <Route path="/login" element={<Navigate to="/shop" replace />} />
             <Route path="/signup" element={<Navigate to="/shop" replace />} />
-            <Route path="/forgot-password" element={<Navigate to="/shop" replace />} />
+            <Route
+              path="/forgot-password"
+              element={<Navigate to="/shop" replace />}
+            />
             <Route path="*" element={<Navigate to="/shop" replace />} />
           </Routes>
         </MemberLayout>
@@ -161,7 +171,10 @@ const AppShell = () => {
         <Route path="/unauthorized" element={<UnauthorizedPage />} />
         <Route path="/login" element={<Navigate to="/dashboard" replace />} />
         <Route path="/signup" element={<Navigate to="/dashboard" replace />} />
-        <Route path="/forgot-password" element={<Navigate to="/dashboard" replace />} />
+        <Route
+          path="/forgot-password"
+          element={<Navigate to="/dashboard" replace />}
+        />
         <Route path="*" element={<Navigate to="/dashboard" replace />} />
       </Routes>
     </AppLayout>
@@ -171,7 +184,9 @@ const AppShell = () => {
 const App = () => (
   <BrowserRouter>
     <AuthProvider>
-      <AppShell />
+      <SocketProvider>
+        <AppShell />
+      </SocketProvider>
     </AuthProvider>
   </BrowserRouter>
 );
