@@ -105,23 +105,19 @@ jobs:
         run: npm ci
         working-directory: frontend
 
+      - name: Validate backend build
+        run: npm run build
+        working-directory: backend
+
+      - name: Validate frontend build
+        run: npm run build
+        working-directory: frontend
+
       - name: Install Vercel CLI
         run: npm install --global vercel@latest
 
-      - name: Pull backend configuration
-        run: vercel pull --yes --environment=production --token="$VERCEL_TOKEN"
-        working-directory: backend
-        env:
-          VERCEL_PROJECT_ID: ${{ needs.validate.outputs.backend_project_id }}
-
-      - name: Build backend
-        run: vercel build --prod --token="$VERCEL_TOKEN"
-        working-directory: backend
-        env:
-          VERCEL_PROJECT_ID: ${{ needs.validate.outputs.backend_project_id }}
-
       - name: Deploy backend
-        run: vercel deploy --prebuilt --prod --token="$VERCEL_TOKEN"
+        run: vercel deploy --yes --prod --token="$VERCEL_TOKEN"
         working-directory: backend
         env:
           VERCEL_PROJECT_ID: ${{ needs.validate.outputs.backend_project_id }}
@@ -129,20 +125,8 @@ jobs:
       - name: Verify backend health
         run: curl --fail --retry 6 --retry-delay 5 --retry-all-errors "${{ needs.validate.outputs.backend_url }}/health"
 
-      - name: Pull frontend configuration
-        run: vercel pull --yes --environment=production --token="$VERCEL_TOKEN"
-        working-directory: frontend
-        env:
-          VERCEL_PROJECT_ID: ${{ needs.validate.outputs.frontend_project_id }}
-
-      - name: Build frontend
-        run: vercel build --prod --token="$VERCEL_TOKEN"
-        working-directory: frontend
-        env:
-          VERCEL_PROJECT_ID: ${{ needs.validate.outputs.frontend_project_id }}
-
       - name: Deploy frontend
-        run: vercel deploy --prebuilt --prod --token="$VERCEL_TOKEN"
+        run: vercel deploy --yes --prod --token="$VERCEL_TOKEN"
         working-directory: frontend
         env:
           VERCEL_PROJECT_ID: ${{ needs.validate.outputs.frontend_project_id }}
