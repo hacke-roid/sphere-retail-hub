@@ -118,7 +118,6 @@ jobs:
 
       - name: Deploy backend
         run: vercel deploy --yes --prod --token="$VERCEL_TOKEN"
-        working-directory: backend
         env:
           VERCEL_PROJECT_ID: ${{ needs.validate.outputs.backend_project_id }}
 
@@ -127,7 +126,6 @@ jobs:
 
       - name: Deploy frontend
         run: vercel deploy --yes --prod --token="$VERCEL_TOKEN"
-        working-directory: frontend
         env:
           VERCEL_PROJECT_ID: ${{ needs.validate.outputs.frontend_project_id }}
 
